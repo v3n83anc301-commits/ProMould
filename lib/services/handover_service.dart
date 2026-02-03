@@ -259,16 +259,15 @@ class HandoverService {
 
   /// Public method to create a handover with snapshot
   static Future<ShiftHandover> createHandover({
-    required String shiftId,
+    required String shiftId, // Kept for API compatibility but not used
     required String outgoingUserId,
     required String outgoingUserName,
     String? notes,
     String? safetyNotes,
     String? specialInstructions,
   }) async {
-    // Initiate the handover
+    // Initiate the handover (shiftId comes from ShiftService)
     final handover = await initiateHandover(
-      shiftId: shiftId,
       outgoingUserId: outgoingUserId,
       outgoingUserName: outgoingUserName,
     );

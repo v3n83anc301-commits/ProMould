@@ -429,9 +429,9 @@ class _IncomingHandoverCard extends StatelessWidget {
         }
 
         await HandoverService.acknowledgeHandover(
-          handover.id,
-          currentUser.id,
-          currentUser.username,
+          handoverId: handover.id,
+          userId: currentUser.id,
+          userName: currentUser.username,
         );
 
         if (context.mounted) {
