@@ -409,7 +409,7 @@ class SparePartsService {
 
     await _partsBox?.put(part.id, part.toMap());
     await SyncService.push('sparePartsBox', part.id, part.toMap());
-    await AuditService.logCreate(entityType: 'SparePart', entityId: part.id, newValue: part.toMap());
+    await AuditService.logCreate(entityType: 'SparePart', entityId: part.id, data: part.toMap());
     LogService.info('Spare part created: ${part.name}');
     return part;
   }
@@ -565,7 +565,7 @@ class SparePartsService {
 
     await _requestsBox?.put(request.id, request.toMap());
     await SyncService.push('partRequestsBox', request.id, request.toMap());
-    await AuditService.logCreate(entityType: 'PartRequest', entityId: request.id, newValue: request.toMap());
+    await AuditService.logCreate(entityType: 'PartRequest', entityId: request.id, data: request.toMap());
     LogService.info('Part request created: $partId qty $quantity');
     return request;
   }
