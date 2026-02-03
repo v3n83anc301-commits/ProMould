@@ -19,6 +19,7 @@ import 'services/alert_service.dart';
 import 'services/task_service.dart';
 import 'services/handover_service.dart';
 import 'services/reconciliation_service.dart';
+import 'services/machine_runtime_service.dart';
 import 'core/constants.dart';
 import 'utils/memory_manager.dart';
 import 'utils/data_initializer.dart';
@@ -118,6 +119,7 @@ void main() async {
       await TaskService.initialize();
       await HandoverService.initialize();
       await ReconciliationService.initialize();
+      await MachineRuntimeService.initialize();
       LogService.info('ProMould v9 core services initialized');
     } catch (e) {
       LogService.warning('Some v9 services failed to initialize', e);

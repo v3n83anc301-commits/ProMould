@@ -106,6 +106,13 @@ enum Permission {
   maintenanceCompleteWorkOrder,
   maintenanceOverride,
 
+  // Machine Runtime & Downtime
+  runtimeView,
+  runtimeUpdateStatus,
+  logDowntime,
+  resolveDowntime,
+  oeeView,
+
   // Task Management
   tasksView,
   tasksViewOwn,
@@ -232,6 +239,8 @@ class PermissionMatrix {
       Permission.tasksView,
       Permission.alertsView,
       Permission.shiftsView,
+      Permission.runtimeView,
+      Permission.oeeView,
 
       // Machine permissions
       Permission.machinesChangeStatus,
@@ -252,6 +261,11 @@ class PermissionMatrix {
       Permission.productionLogEntry,
       Permission.productionLogScrap,
       Permission.productionLogDowntime,
+
+      // Runtime & Downtime permissions
+      Permission.runtimeUpdateStatus,
+      Permission.logDowntime,
+      Permission.resolveDowntime,
 
       // Job permissions
       Permission.jobsStart,

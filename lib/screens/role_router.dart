@@ -41,6 +41,7 @@ import 'job_analytics_screen.dart';
 import 'daily_production_sheet_screen.dart';
 import 'shift_handover_screen.dart';
 import 'counter_reconciliation_screen.dart';
+import 'machine_runtime_dashboard.dart';
 
 class RoleRouter extends StatefulWidget {
   final int level;
@@ -354,6 +355,11 @@ class _RoleRouterState extends State<RoleRouter> {
                 'Counter Reconciliation',
                 CounterReconciliationScreen(
                     username: widget.username, level: widget.level)),
+          _drawerItem(
+              Icons.speed,
+              'Machine Runtime',
+              MachineRuntimeDashboard(
+                  username: widget.username, level: widget.level)),
           if (isManager)
             _drawerItem(Icons.archive_outlined, 'Finished Jobs',
                 const FinishedJobsScreen()),
