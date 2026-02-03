@@ -310,14 +310,27 @@ class AuditService {
 
   /// Log a logout
   static Future<AuditEntry> logLogout({
+    required String userId,
+    required String userName,
+    required UserRole userRole,
+    String? deviceInfo,
     Map<String, dynamic>? metadata,
   }) async {
-    return _log(
+    final entry = AuditEntry(
+      id: _uuid.v4(),
       entityType: 'User',
-      entityId: _currentUserId ?? 'unknown',
+      entityId: userId,
       action: AuditAction.logout,
+      userId: userId,
+      userName: userName,
+      userRole: userRole,
+      timestamp: DateTime.now(),
+      deviceInfo: deviceInfo,
       metadata: metadata,
     );
+
+    await _save(entry);
+    return entry;
   }
 
   /// Log an escalation

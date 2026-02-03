@@ -4,6 +4,9 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import '../services/log_service.dart';
+import '../services/rbac_service.dart';
+import '../services/audit_service.dart';
+import '../config/permissions.dart';
 import '../core/constants.dart';
 
 // import all screens
@@ -378,7 +381,24 @@ class _RoleRouterState extends State<RoleRouter> {
                       child: const Text('Cancel'),
                     ),
                     ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
+                        // Log logout event before clearing context
+                        final currentUser = RBACService.currentUser;
+                        if (currentUser != null) {
+                          try {
+                            await AuditService.logLogout(
+                              userId: currentUser.id,
+                              userName: currentUser.username,
+                              userRole: currentUser.role,
+                            );
+                          } catch (e) {
+                            LogService.warning('Could not log logout event: $e');
+                          }
+                        }
+                        
+                        // Clear RBAC context
+                        RBACService.clearCurrentUser();
+                        
                         Navigator.pop(dialogContext); // Close dialog
                         Navigator.pop(context); // Close drawer
                         // Navigate back to login and remove all routes

@@ -4,6 +4,10 @@ import '../theme/dark_theme.dart';
 import '../utils/validators.dart';
 import '../services/error_handler.dart';
 import '../services/log_service.dart';
+import '../services/rbac_service.dart';
+import '../services/audit_service.dart';
+import '../models/user_model.dart';
+import '../core/constants.dart';
 import 'role_router.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -99,6 +103,22 @@ class _LoginScreenState extends State<LoginScreen> {
 
       final level = (user['level'] ?? 1) as int;
       LogService.auth('User $u logged in successfully (Level $level)');
+
+      // Set RBAC context for the logged-in user
+      try {
+        final rbacUser = User.fromMap(Map<String, dynamic>.from(user));
+        RBACService.setCurrentUser(rbacUser);
+        
+        // Log the login event
+        await AuditService.logLogin(
+          userId: rbacUser.id,
+          userName: rbacUser.username,
+          userRole: rbacUser.role,
+        );
+      } catch (e) {
+        LogService.warning('Could not set RBAC context: $e');
+        // Continue with legacy level-based auth as fallback
+      }
 
       if (mounted) {
         Navigator.of(context).pushReplacement(MaterialPageRoute(
