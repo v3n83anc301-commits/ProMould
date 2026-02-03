@@ -21,7 +21,7 @@ android {
 
     defaultConfig {
         applicationId = "com.promould.app"
-        minSdk = flutter.minSdkVersion
+        minSdk = 23  // Required by cloud_firestore
         targetSdk = 36    // <<< IMPORTANT – force Android 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
