@@ -13,7 +13,7 @@ class BackgroundSync {
       taskName,
       frequency: const Duration(minutes: 1),
       initialDelay: const Duration(seconds: 15),
-      existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
+      existingWorkPolicy: ExistingWorkPolicy.keep,
     );
   }
 

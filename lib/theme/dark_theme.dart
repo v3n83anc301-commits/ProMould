@@ -34,11 +34,11 @@ class AppTheme {
             borderSide: const BorderSide(color: primary, width: 2)),
         labelStyle: const TextStyle(color: text),
       ),
-      cardTheme: const CardThemeData(
+      cardTheme: CardTheme(
         color: surface,
         elevation: 2,
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(18))),
+            borderRadius: BorderRadius.circular(18)),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(

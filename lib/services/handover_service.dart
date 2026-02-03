@@ -250,6 +250,59 @@ class HandoverService {
     return skipped;
   }
 
+  // ============ PUBLIC API FOR UI ============
+
+  /// Public method to capture snapshot for preview
+  static Future<HandoverSnapshot> captureSnapshot() async {
+    return _captureSnapshot();
+  }
+
+  /// Public method to create a handover with snapshot
+  static Future<ShiftHandover> createHandover({
+    required String shiftId,
+    required String outgoingUserId,
+    required String outgoingUserName,
+    String? notes,
+    String? safetyNotes,
+    String? specialInstructions,
+  }) async {
+    // Initiate the handover
+    final handover = await initiateHandover(
+      shiftId: shiftId,
+      outgoingUserId: outgoingUserId,
+      outgoingUserName: outgoingUserName,
+    );
+
+    // Start it (capture snapshot)
+    final started = await startHandover(handover.id);
+    if (started == null) {
+      throw Exception('Failed to start handover');
+    }
+
+    // Add notes if provided
+    if (notes != null || safetyNotes != null || specialInstructions != null) {
+      final updated = started.copyWith(
+        notes: notes,
+        safetyNotes: safetyNotes,
+        specialInstructions: specialInstructions,
+      );
+      await _handoversBox?.put(started.id, updated.toMap());
+      await SyncService.push(HiveBoxes.handovers, started.id, updated.toMap());
+      return updated;
+    }
+
+    return started;
+  }
+
+  /// Public method to acknowledge handover
+  static Future<ShiftHandover?> acknowledgeHandover({
+    required String handoverId,
+    required String userId,
+    required String userName,
+  }) async {
+    return acknowledgeIncoming(handoverId, userId, userName);
+  }
+
   // ============ SNAPSHOT CAPTURE ============
 
   /// Capture immutable snapshot of current factory state
