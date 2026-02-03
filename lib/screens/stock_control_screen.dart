@@ -749,6 +749,7 @@ class _RequestsTab extends StatelessWidget {
   const _RequestsTab({
     required this.requests,
     required this.parts,
+    required this.username,
     required this.onRefresh,
   });
 
