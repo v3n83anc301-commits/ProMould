@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'theme/dark_theme.dart';
+import 'ui/theme/theme.dart';
 import 'services/sync_service.dart';
 import 'services/background_sync.dart';
 import 'services/live_progress_service.dart';
@@ -215,7 +215,7 @@ class ProMouldApp extends StatelessWidget {
     return MaterialApp(
       title: 'ProMould',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.dark(),
+      theme: AppTheme.darkTheme,
       scaffoldMessengerKey: ErrorHandler.scaffoldMessengerKey,
       home: const LoginScreen(),
     );
