@@ -336,9 +336,8 @@ class MachineRuntimeService {
     await AuditService.logStatusChange(
       entityType: 'MachineRuntime',
       entityId: machineId,
-      previousStatus: previousStatus.name,
-      newStatus: status.name,
-      changedBy: updatedBy,
+      fromStatus: previousStatus.name,
+      toStatus: status.name,
     );
 
     LogService.info('Machine $machineId status changed: ${previousStatus.name} -> ${status.name}');
@@ -405,7 +404,7 @@ class MachineRuntimeService {
     await AuditService.logCreate(
       entityType: 'DowntimeEvent',
       entityId: event.id,
-      createdValue: event.toMap(),
+      data: event.toMap(),
     );
 
     LogService.info('Downtime started for machine $machineId: ${category.name} - $reason');

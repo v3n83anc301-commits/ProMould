@@ -405,41 +405,10 @@ class _DowntimeTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final canLogDowntime = RBACService.can(Permission.logDowntime);
+    final canLogDowntime = RBACService.hasPermission(Permission.logDowntime);
 
-    return RefreshIndicator(
-      onRefresh: () async => onRefresh(),
-      child: activeDowntimes.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.check_circle, size: 64, color: Colors.green.shade400),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'No active downtime',
-                    style: TextStyle(fontSize: 18, color: Colors.white70),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'All machines operational',
-                    style: TextStyle(color: Colors.white54),
-                  ),
-                ],
-              ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: activeDowntimes.length,
-              itemBuilder: (context, index) {
-                final event = activeDowntimes[index];
-                return _DowntimeCard(
-                  event: event,
-                  canResolve: canLogDowntime,
-                  onResolve: () => _resolveDowntime(context, event),
-                );
-              },
-            ),
+    return Scaffold(
+      backgroundColor: Colors.transparent,
       floatingActionButton: canLogDowntime
           ? FloatingActionButton.extended(
               onPressed: () => _logNewDowntime(context),
@@ -448,6 +417,40 @@ class _DowntimeTab extends StatelessWidget {
               backgroundColor: const Color(0xFFFF6B6B),
             )
           : null,
+      body: RefreshIndicator(
+        onRefresh: () async => onRefresh(),
+        child: activeDowntimes.isEmpty
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.check_circle, size: 64, color: Colors.green.shade400),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'No active downtime',
+                      style: TextStyle(fontSize: 18, color: Colors.white70),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'All machines operational',
+                      style: TextStyle(color: Colors.white54),
+                    ),
+                  ],
+                ),
+              )
+            : ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: activeDowntimes.length,
+                itemBuilder: (context, index) {
+                  final event = activeDowntimes[index];
+                  return _DowntimeCard(
+                    event: event,
+                    canResolve: canLogDowntime,
+                    onResolve: () => _resolveDowntime(context, event),
+                  );
+                },
+              ),
+      ),
     );
   }
 
