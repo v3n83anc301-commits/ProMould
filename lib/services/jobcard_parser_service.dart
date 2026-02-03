@@ -430,20 +430,23 @@ class JobcardParserService {
   }
 
   ConfidenceValue<int> _extractTargetCycleDay(List<String> lines) {
-    // Find "Target Cycle Day" label, value appears 10-25 lines after
+    // Find "Target Cycle Day" label with common OCR typos
+    // Also handle "Traget", "Targer", "Targel" variations
     for (int i = 0; i < lines.length; i++) {
-      if (RegExp(r'target\s*cycle\s*day|traget\s*cycle\s*day',
+      if (RegExp(r't[ar]+get\s*cycle\s*day|cycle\s*day\s*target',
               caseSensitive: false)
           .hasMatch(lines[i])) {
         LogService.info(
             'Found Target Cycle Day label at line $i: "${lines[i]}"');
-        // Search wider range: 10-25 lines after label
-        for (int j = i + 10; j < lines.length && j < i + 26; j++) {
+        // Search wider range: 5-30 lines after label (expanded range)
+        for (int j = i + 5; j < lines.length && j < i + 31; j++) {
           final line = lines[j].trim();
-          final match = RegExp(r'^([\d,]+)\.?\d*$').firstMatch(line);
+          // Match standalone numbers or numbers with units
+          final match = RegExp(r'^([\d,]+)\.?\d*\s*(?:sec|s)?$').firstMatch(line);
           if (match != null) {
             final val = int.tryParse(match.group(1)!.replaceAll(',', ''));
-            if (val != null && val >= 200 && val <= 700) {
+            // Typical cycle times: 150-800 seconds
+            if (val != null && val >= 150 && val <= 800) {
               LogService.info(
                   '✅ Target Cycle Day: $val (line $j, offset ${j - i})');
               return ConfidenceValue(value: val, confidence: 0.9);
@@ -454,13 +457,31 @@ class JobcardParserService {
         break;
       }
     }
+    
+    // Fallback: look for "Day" column header followed by numeric value
+    for (int i = 0; i < lines.length; i++) {
+      if (RegExp(r'^day$', caseSensitive: false).hasMatch(lines[i].trim())) {
+        for (int j = i + 1; j < lines.length && j < i + 10; j++) {
+          final line = lines[j].trim();
+          final match = RegExp(r'^([\d,]+)$').firstMatch(line);
+          if (match != null) {
+            final val = int.tryParse(match.group(1)!.replaceAll(',', ''));
+            if (val != null && val >= 150 && val <= 800) {
+              LogService.info('✅ Target Cycle Day (fallback): $val');
+              return ConfidenceValue(value: val, confidence: 0.7);
+            }
+          }
+        }
+      }
+    }
+    
     LogService.warning('Target Cycle Day label not found');
     return ConfidenceValue(value: null, confidence: 0.0);
   }
 
   ConfidenceValue<int> _extractTargetCycleNight(List<String> lines) {
-    // Find "Target Cycle Night" label, value appears 10-25 lines after
-    // Night value is ALWAYS higher than Day
+    // Find "Target Cycle Night" label with common OCR typos
+    // Night value is typically higher than Day (longer cycle due to reduced staffing)
     int? dayValue;
 
     // First get the day value for validation
@@ -470,23 +491,25 @@ class JobcardParserService {
     }
 
     for (int i = 0; i < lines.length; i++) {
-      if (RegExp(r'target\s*cycle\s*night|traget\s*cycle\s*night',
+      if (RegExp(r't[ar]+get\s*cycle\s*night|cycle\s*night\s*target',
               caseSensitive: false)
           .hasMatch(lines[i])) {
         LogService.info(
             'Found Target Cycle Night label at line $i: "${lines[i]}"');
-        // Search wider range: 10-25 lines after label
-        for (int j = i + 10; j < lines.length && j < i + 26; j++) {
+        // Search wider range: 5-30 lines after label (expanded range)
+        for (int j = i + 5; j < lines.length && j < i + 31; j++) {
           final line = lines[j].trim();
-          final match = RegExp(r'^([\d,]+)\.?\d*$').firstMatch(line);
+          // Match standalone numbers or numbers with units
+          final match = RegExp(r'^([\d,]+)\.?\d*\s*(?:sec|s)?$').firstMatch(line);
           if (match != null) {
             final val = int.tryParse(match.group(1)!.replaceAll(',', ''));
-            // Night must be >= 300, <= 900, and HIGHER than day if day exists
-            if (val != null && val >= 300 && val <= 900) {
-              // If we have a day value, night must be higher
-              if (dayValue != null && val <= dayValue) {
+            // Night cycle: 200-1000 seconds (typically higher than day)
+            if (val != null && val >= 200 && val <= 1000) {
+              // If we have a day value, night should typically be >= day
+              // But don't skip if close (within 10%)
+              if (dayValue != null && val < dayValue * 0.9) {
                 LogService.debug(
-                    'Skipping night value $val (not higher than day $dayValue)');
+                    'Skipping night value $val (significantly lower than day $dayValue)');
                 continue;
               }
               LogService.info(
@@ -497,6 +520,23 @@ class JobcardParserService {
         }
         LogService.warning('No valid Target Cycle Night found in range');
         break;
+      }
+    }
+    
+    // Fallback: look for "Night" column header followed by numeric value
+    for (int i = 0; i < lines.length; i++) {
+      if (RegExp(r'^night$', caseSensitive: false).hasMatch(lines[i].trim())) {
+        for (int j = i + 1; j < lines.length && j < i + 10; j++) {
+          final line = lines[j].trim();
+          final match = RegExp(r'^([\d,]+)$').firstMatch(line);
+          if (match != null) {
+            final val = int.tryParse(match.group(1)!.replaceAll(',', ''));
+            if (val != null && val >= 200 && val <= 1000) {
+              LogService.info('✅ Target Cycle Night (fallback): $val');
+              return ConfidenceValue(value: val, confidence: 0.7);
+            }
+          }
+        }
       }
     }
     LogService.warning('Target Cycle Night label not found');

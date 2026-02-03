@@ -202,17 +202,34 @@ class _MouldChangeSchedulerScreenState
           Hive.isBoxOpen('mouldsBox') ? Hive.box('mouldsBox') : null;
       final usersBox = Hive.isBoxOpen('usersBox') ? Hive.box('usersBox') : null;
 
-      final machine = machinesBox?.get(change['machineId']) as Map?;
-      final fromMould = mouldsBox?.get(change['fromMouldId']) as Map?;
-      final toMould = mouldsBox?.get(change['toMouldId']) as Map?;
-      final setter = usersBox?.values.cast<Map>().firstWhere(
+      // Safely get related data with null checks
+      Map? machine;
+      Map? fromMould;
+      Map? toMould;
+      Map setter = {'username': 'Unassigned'};
+      
+      if (machinesBox != null && change['machineId'] != null) {
+        machine = machinesBox.get(change['machineId']) as Map?;
+      }
+      if (mouldsBox != null && change['fromMouldId'] != null) {
+        fromMould = mouldsBox.get(change['fromMouldId']) as Map?;
+      }
+      if (mouldsBox != null && change['toMouldId'] != null) {
+        toMould = mouldsBox.get(change['toMouldId']) as Map?;
+      }
+      if (usersBox != null && change['assignedTo'] != null) {
+        try {
+          setter = usersBox.values.cast<Map>().firstWhere(
                 (u) => u['username'] == change['assignedTo'],
-                orElse: () => {'username': 'Unassigned'},
-              ) ??
-          {'username': 'Unassigned'};
+                orElse: () => {'username': change['assignedTo'] ?? 'Unassigned'},
+              );
+        } catch (_) {
+          setter = {'username': change['assignedTo'] ?? 'Unassigned'};
+        }
+      }
 
       final scheduledDate =
-          DateTime.tryParse(change['scheduledDate'] ?? '') ?? DateTime.now();
+          DateTime.tryParse(change['scheduledDate']?.toString() ?? '') ?? DateTime.now();
       final isOverdue =
           status == 'Scheduled' && scheduledDate.isBefore(DateTime.now());
 

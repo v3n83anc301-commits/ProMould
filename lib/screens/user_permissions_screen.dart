@@ -224,23 +224,24 @@ class _UserPermissionsScreenState extends State<UserPermissionsScreen> {
     try {
       final usersBox = Hive.box('usersBox');
 
-      // Get user
-      var userData = usersBox.get(_selectedUsername);
-      if (userData == null) {
-        final allUsers = usersBox.values.cast<Map>().toList();
-        for (var u in allUsers) {
-          if (u['username'] == _selectedUsername) {
-            userData = u;
-            break;
-          }
+      // Find user by iterating through all entries to get the correct key
+      dynamic userKey;
+      Map? userData;
+      
+      for (var key in usersBox.keys) {
+        final user = usersBox.get(key) as Map?;
+        if (user != null && user['username'] == _selectedUsername) {
+          userKey = key;
+          userData = user;
+          break;
         }
       }
 
-      if (userData == null) {
+      if (userData == null || userKey == null) {
         throw Exception('User not found: $_selectedUsername');
       }
 
-      final user = Map<String, dynamic>.from(userData as Map);
+      final user = Map<String, dynamic>.from(userData);
       final level = user['level'] as int;
 
       // Reset to defaults
@@ -249,10 +250,10 @@ class _UserPermissionsScreenState extends State<UserPermissionsScreen> {
         _permissions = Map<String, bool>.from(defaults);
       });
 
-      // Save the reset permissions
+      // Save the reset permissions using the original key
       user['permissions'] = Map<String, bool>.from(_permissions);
-      await usersBox.put(_selectedUsername, user);
-      await SyncService.pushChange('usersBox', _selectedUsername!, user);
+      await usersBox.put(userKey, user);
+      await SyncService.pushChange('usersBox', userKey.toString(), user);
 
       LogService.info('Reset permissions to defaults for $_selectedUsername');
 
@@ -291,48 +292,44 @@ class _UserPermissionsScreenState extends State<UserPermissionsScreen> {
           'Attempting to save permissions for: $_selectedUsername');
       LogService.debug('Permissions to save: $_permissions');
 
-      // Try direct get first
-      var userData = usersBox.get(_selectedUsername);
-
-      // If not found by key, search through all users
-      if (userData == null) {
-        LogService.debug('User not found by key, searching all users...');
-        final allUsers = usersBox.values.cast<Map>().toList();
-        LogService.debug('Total users in box: ${allUsers.length}');
-
-        for (var user in allUsers) {
-          LogService.debug('Checking user: ${user['username']}');
-          if (user['username'] == _selectedUsername) {
-            userData = user;
-            LogService.debug('Found user by username match');
-            break;
-          }
+      // Find user by iterating through all entries to get the correct key
+      dynamic userKey;
+      Map? userData;
+      
+      for (var key in usersBox.keys) {
+        final user = usersBox.get(key) as Map?;
+        if (user != null && user['username'] == _selectedUsername) {
+          userKey = key;
+          userData = user;
+          LogService.debug('Found user at key: $key');
+          break;
         }
       }
 
-      if (userData == null) {
+      if (userData == null || userKey == null) {
         LogService.error(
             'User not found after search: $_selectedUsername', null);
         throw Exception('User not found: $_selectedUsername');
       }
 
-      final user = Map<String, dynamic>.from(userData as Map);
+      final user = Map<String, dynamic>.from(userData);
 
       // Save the complete permission set
       user['permissions'] = Map<String, bool>.from(_permissions);
 
       LogService.debug(
-          'Saving user with permissions to key: $_selectedUsername');
+          'Saving user with permissions to key: $userKey');
       LogService.debug('User data before save: ${user.toString()}');
       LogService.debug('Permissions being saved: $_permissions');
 
-      await usersBox.put(_selectedUsername, user);
+      // Save using the original key (could be index or username)
+      await usersBox.put(userKey, user);
 
       // Verify the save
-      final savedUser = usersBox.get(_selectedUsername);
+      final savedUser = usersBox.get(userKey);
       LogService.debug('User data after save: ${savedUser.toString()}');
 
-      await SyncService.pushChange('usersBox', _selectedUsername!, user);
+      await SyncService.pushChange('usersBox', userKey.toString(), user);
 
       LogService.info(
           'Successfully updated permissions for $_selectedUsername');

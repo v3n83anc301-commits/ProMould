@@ -18,6 +18,7 @@ class _MouldChangeChecklistScreenState
     extends State<MouldChangeChecklistScreen> {
   final _formKey = GlobalKey<FormState>();
   final _uuid = const Uuid();
+  bool _isInitialized = false;
 
   // General Details Controllers
   final _machineIdCtrl = TextEditingController();
@@ -127,6 +128,15 @@ class _MouldChangeChecklistScreenState
   @override
   void initState() {
     super.initState();
+    _initializeBoxAndChecks();
+  }
+
+  Future<void> _initializeBoxAndChecks() async {
+    // Ensure box is open
+    if (!Hive.isBoxOpen('mouldChangesBox')) {
+      await Hive.openBox('mouldChangesBox');
+    }
+    
     // Initialize all checks to false
     for (var item in _removalItems) {
       _removalChecks[item['id']!] = false;
@@ -143,6 +153,10 @@ class _MouldChangeChecklistScreenState
     for (var item in _signoffItems) {
       _signoffChecks[item['id']!] = false;
       _signoffComments[item['id']!] = '';
+    }
+    
+    if (mounted) {
+      setState(() => _isInitialized = true);
     }
   }
 
@@ -219,6 +233,19 @@ class _MouldChangeChecklistScreenState
 
   @override
   Widget build(BuildContext context) {
+    if (!_isInitialized) {
+      return Scaffold(
+        backgroundColor: const Color(0xFF0A0E1A),
+        appBar: AppBar(
+          title: const Text('Mould Change Checklist'),
+          backgroundColor: const Color(0xFF0F1419),
+        ),
+        body: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+    
     return Scaffold(
       backgroundColor: const Color(0xFF0A0E1A),
       appBar: AppBar(
