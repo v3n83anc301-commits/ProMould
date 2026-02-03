@@ -351,6 +351,9 @@ class _UserPermissionsScreenState extends State<UserPermissionsScreen> {
           'Successfully updated permissions for $_selectedUsername');
 
       if (mounted) {
+        // Refresh the UI to reflect saved permissions
+        setState(() {});
+        
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Permissions saved successfully'),

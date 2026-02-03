@@ -290,19 +290,25 @@ class HandoverService {
       throw Exception('Failed to start handover');
     }
 
+    // Sign off as outgoing user (required for completion when incoming acknowledges)
+    final signedOff = await signOffOutgoing(started.id);
+    if (signedOff == null) {
+      throw Exception('Failed to sign off handover');
+    }
+
     // Add notes if provided
     if (notes != null || safetyNotes != null || specialInstructions != null) {
-      final updated = started.copyWith(
+      final updated = signedOff.copyWith(
         notes: notes,
         safetyNotes: safetyNotes,
         specialInstructions: specialInstructions,
       );
-      await _handoversBox?.put(started.id, updated.toMap());
-      await SyncService.push(HiveBoxes.handovers, started.id, updated.toMap());
+      await _handoversBox?.put(signedOff.id, updated.toMap());
+      await SyncService.push(HiveBoxes.handovers, signedOff.id, updated.toMap());
       return updated;
     }
 
-    return started;
+    return signedOff;
   }
 
   /// Public method to acknowledge handover

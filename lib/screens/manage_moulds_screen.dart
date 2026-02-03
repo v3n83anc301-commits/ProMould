@@ -153,15 +153,18 @@ class _ManageMouldsScreenState extends State<ManageMouldsScreen> {
                         };
                         await box.put(id, data);
                         await SyncService.pushChange('mouldsBox', id, data);
-                        if (context.mounted) {
-                          Navigator.pop(dialogContext);
+                        if (dialogContext.mounted) {
+                          Navigator.pop(dialogContext, true); // Return true to indicate save
                         }
                       },
                       child: const Text('Save')),
                 ],
               ),
             ));
-    setState(() {});
+    // Refresh list after dialog closes (if saved)
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
