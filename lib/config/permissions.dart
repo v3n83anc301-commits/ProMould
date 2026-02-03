@@ -113,6 +113,14 @@ enum Permission {
   resolveDowntime,
   oeeView,
 
+  // Stock Control / Spare Parts
+  stockControlView,
+  stockControlReceive,
+  stockControlIssue,
+  stockControlAdjust,
+  stockControlApproveAdjust,
+  stockControlRequestParts,
+
   // Task Management
   tasksView,
   tasksViewOwn,
@@ -197,6 +205,12 @@ class PermissionMatrix {
       Permission.materialsReturn,
       Permission.materialsAdjust,
 
+      // Stock Control permissions (full access for Material Handler)
+      Permission.stockControlView,
+      Permission.stockControlReceive,
+      Permission.stockControlIssue,
+      Permission.stockControlAdjust,
+
       // Action permissions
       Permission.tasksComplete,
       Permission.alertsAcknowledge,
@@ -266,6 +280,10 @@ class PermissionMatrix {
       Permission.runtimeUpdateStatus,
       Permission.logDowntime,
       Permission.resolveDowntime,
+
+      // Stock Control (Setters can view and request parts)
+      Permission.stockControlView,
+      Permission.stockControlRequestParts,
 
       // Job permissions
       Permission.jobsStart,

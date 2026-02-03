@@ -42,6 +42,7 @@ import 'daily_production_sheet_screen.dart';
 import 'shift_handover_screen.dart';
 import 'counter_reconciliation_screen.dart';
 import 'machine_runtime_dashboard.dart';
+import 'stock_control_screen.dart';
 
 class RoleRouter extends StatefulWidget {
   final int level;
@@ -360,6 +361,12 @@ class _RoleRouterState extends State<RoleRouter> {
               'Machine Runtime',
               MachineRuntimeDashboard(
                   username: widget.username, level: widget.level)),
+          if (RBACService.hasPermission(Permission.stockControlView))
+            _drawerItem(
+                Icons.inventory_2,
+                'Stock Control',
+                StockControlScreen(
+                    username: widget.username, level: widget.level)),
           if (isManager)
             _drawerItem(Icons.archive_outlined, 'Finished Jobs',
                 const FinishedJobsScreen()),
