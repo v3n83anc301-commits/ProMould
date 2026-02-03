@@ -40,6 +40,7 @@ import 'finished_jobs_screen.dart';
 import 'job_analytics_screen.dart';
 import 'daily_production_sheet_screen.dart';
 import 'shift_handover_screen.dart';
+import 'counter_reconciliation_screen.dart';
 
 class RoleRouter extends StatefulWidget {
   final int level;
@@ -346,6 +347,12 @@ class _RoleRouterState extends State<RoleRouter> {
                 Icons.swap_horiz_outlined,
                 'Shift Handover',
                 ShiftHandoverScreen(
+                    username: widget.username, level: widget.level)),
+          if (isManager)
+            _drawerItem(
+                Icons.sync,
+                'Counter Reconciliation',
+                CounterReconciliationScreen(
                     username: widget.username, level: widget.level)),
           if (isManager)
             _drawerItem(Icons.archive_outlined, 'Finished Jobs',
