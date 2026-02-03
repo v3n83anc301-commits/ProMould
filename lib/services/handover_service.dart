@@ -185,21 +185,33 @@ class HandoverService {
     final handover = getHandover(handoverId);
     if (handover == null) return null;
 
+    final beforeStatus = handover.status;
     final acknowledged = handover.acknowledgeIncoming(userId, userName);
     await _handoversBox?.put(handoverId, acknowledged.toMap());
     await SyncService.push(HiveBoxes.handovers, handoverId, acknowledged.toMap());
 
+    // Log the acknowledgment
     await AuditService.logUpdate(
       entityType: 'ShiftHandover',
       entityId: handoverId,
-      beforeValue: {'incomingAcknowledgment': false},
+      beforeValue: {
+        'incomingAcknowledgment': false,
+        'status': beforeStatus.name,
+      },
       afterValue: {
         'incomingAcknowledgment': true,
         'incomingUser': userName,
+        'status': acknowledged.status.name,
       },
     );
 
-    LogService.info('Incoming user acknowledged: $handoverId by $userName');
+    // If handover is now complete, log completion separately
+    if (acknowledged.status == HandoverStatus.complete) {
+      LogService.info('Handover completed: $handoverId (${handover.outgoingUserName} → $userName)');
+    } else {
+      LogService.info('Incoming user acknowledged: $handoverId by $userName');
+    }
+    
     return acknowledged;
   }
 

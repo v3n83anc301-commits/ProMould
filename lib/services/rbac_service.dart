@@ -31,6 +31,30 @@ class RBACService {
     LogService.info('RBAC context cleared');
   }
 
+  /// Invalidate and reload user permissions (call after permission changes)
+  static Future<void> invalidateUser(String userId) async {
+    if (_currentUser?.id == userId) {
+      // Reload user from storage
+      if (_usersBox != null) {
+        for (var key in _usersBox!.keys) {
+          final userData = _usersBox!.get(key) as Map?;
+          if (userData != null && userData['id'] == userId) {
+            _currentUser = User.fromMap(Map<String, dynamic>.from(userData));
+            LogService.info('RBAC cache invalidated and reloaded for user: $userId');
+            return;
+          }
+        }
+      }
+    }
+    LogService.debug('RBAC invalidation requested for user: $userId (not current user)');
+  }
+
+  /// Force refresh current user from storage
+  static Future<void> refreshCurrentUser() async {
+    if (_currentUser == null) return;
+    await invalidateUser(_currentUser!.id);
+  }
+
   /// Get the current user
   static User? get currentUser => _currentUser;
 

@@ -3,6 +3,8 @@ import 'package:hive/hive.dart';
 import '../utils/user_permissions.dart';
 import '../services/sync_service.dart';
 import '../services/log_service.dart';
+import '../services/rbac_service.dart';
+import '../services/audit_service.dart';
 
 class UserPermissionsScreen extends StatefulWidget {
   const UserPermissionsScreen({super.key});
@@ -330,6 +332,20 @@ class _UserPermissionsScreenState extends State<UserPermissionsScreen> {
       LogService.debug('User data after save: ${savedUser.toString()}');
 
       await SyncService.pushChange('usersBox', userKey.toString(), user);
+
+      // Invalidate RBAC cache for this user
+      final userId = user['id'] as String?;
+      if (userId != null) {
+        await RBACService.invalidateUser(userId);
+      }
+
+      // Audit the permission change
+      await AuditService.logUpdate(
+        entityType: 'UserPermissions',
+        entityId: userId ?? userKey.toString(),
+        beforeValue: {'username': _selectedUsername},
+        afterValue: {'permissions': _permissions},
+      );
 
       LogService.info(
           'Successfully updated permissions for $_selectedUsername');
